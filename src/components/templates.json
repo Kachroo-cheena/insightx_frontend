@@ -1,0 +1,13 @@
+[
+    {
+      "heading": "Chest X-Ray",
+      "findings": ["Normal lung expansion", "No signs of pneumonia"],
+      "impression": "No significant abnormalities"
+    },
+    {
+      "heading": "Abdominal X-Ray",
+      "findings": ["No evidence of bowel obstruction", "Free air under the diaphragm"],
+      "impression": "Possible signs of perforation"
+    }
+  ]
+  
