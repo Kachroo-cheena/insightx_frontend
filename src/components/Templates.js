@@ -13,7 +13,7 @@ const TemplatesPage = () => {
   useEffect(() => {
     const fetchTemplates = async () => {
       try {
-        const response = await fetch('http://34.234.93.29/templates', {
+        const response = await fetch('https://34.234.93.29/templates', {
           headers: {
             Authorization: `Bearer ${jwtToken}`, // Attach JWT token
           },
@@ -38,7 +38,7 @@ const TemplatesPage = () => {
   const handleSaveClick = async () => {
     const updatedTemplate = editedTemplate;
     try {
-      await fetch(`http://34.234.93.29/templates/${updatedTemplate.id}`, {
+      await fetch(`https://34.234.93.29/templates/${updatedTemplate.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -60,7 +60,7 @@ const TemplatesPage = () => {
   // Handle adding a new template
   const handleAddTemplate = async () => {
     try {
-      const response = await fetch('http://34.234.93.29/templates', {
+      const response = await fetch('https://34.234.93.29/templates', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

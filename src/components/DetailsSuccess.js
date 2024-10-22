@@ -231,7 +231,7 @@ const PatientDetailsPage = () => {
   useEffect(() => {
     const fetchReportData = async () => {
       try {
-        const response = await fetch(`http://34.234.93.29/report/${reportId}`, {
+        const response = await fetch(`https://34.234.93.29/report/${reportId}`, {
           headers: {
             Authorization: `Bearer ${jwtToken}`, // Add JWT token in Authorization header
           },
@@ -253,7 +253,7 @@ const PatientDetailsPage = () => {
   const handleSave = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`http://34.234.93.29/report/${reportId}`, {
+      const response = await fetch(`https://34.234.93.29/report/${reportId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

@@ -11,7 +11,7 @@ export const LoginProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       // Simulate API call (Replace with your login API endpoint)
-      const response = await fetch('http://34.234.93.29/login', {
+      const response = await fetch('https://34.234.93.29/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
