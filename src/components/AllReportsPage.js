@@ -23,7 +23,7 @@ const AllReportsPage = () => {
       setError(null);
 
       try {
-        const response = await fetch('http://34.234.93.29/reports', {
+        const response = await fetch('https://api.insightxai.in/reports', {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${jwtToken}`, // Add JWT token in Authorization header
