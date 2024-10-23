@@ -40,7 +40,7 @@ export default function Navbar() {
       {/* Right Section: Icons and Profile */}
       <div className="flex items-center space-x-6">
         {/* Notification Icon */}
-        <FaBell className="h-6 w-6 text-gray-600 cursor-pointer" />
+        {/* <FaBell className="h-6 w-6 text-gray-600 cursor-pointer" /> */}
 
         {/* Profile Dropdown */}
         <Menu as="div" className="relative inline-block text-left z-30">
@@ -54,30 +54,7 @@ export default function Navbar() {
           {/* Dropdown Menu */}
           <Menu.Items className="absolute right-0 mt-2 w-48 origin-top-right bg-white divide-y divide-gray-100 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
             <div className="py-1">
-              <Menu.Item>
-                {({ active }) => (
-                  <a
-                    href="/profile"
-                    className={`${
-                      active ? 'bg-gray-100' : ''
-                    } block px-4 py-2 text-sm text-gray-700`}
-                  >
-                    Profile
-                  </a>
-                )}
-              </Menu.Item>
-              <Menu.Item>
-                {({ active }) => (
-                  <a
-                    href="/settings"
-                    className={`${
-                      active ? 'bg-gray-100' : ''
-                    } block px-4 py-2 text-sm text-gray-700`}
-                  >
-                    Settings
-                  </a>
-                )}
-              </Menu.Item>
+              
               <Menu.Item>
                 {({ active }) => (
                   <a

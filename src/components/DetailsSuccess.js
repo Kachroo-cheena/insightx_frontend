@@ -1,13 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { FaCheckCircle, FaEllipsisV, FaChevronLeft, FaBars, FaList } from 'react-icons/fa';
+import React, { useState, useEffect, useDebugValue } from 'react';
+import { FaCheckCircle, FaEllipsisV, FaChevronLeft, FaBars, FaList, FaSave, FaEdit } from 'react-icons/fa';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Drawer from 'react-modern-drawer';
 import 'react-modern-drawer/dist/index.css';
 import './Loading.css';
-import templatesData from './templates.json'; // Import dummy templates
+// import templatesData from './templates.json'; // Import dummy templates
 import { useLogin } from '../context/LoginContext'; // Import Login context
 
-// Convert an image URL to a File object (necessary for API)
 const urlToFile = async (url) => {
   const response = await fetch(url);
   const blob = await response.blob();
@@ -15,16 +14,13 @@ const urlToFile = async (url) => {
   return file;
 };
 
-// Component for displaying X-Ray images and model prediction
-const XRayFiles = ({ xrayFiles }) => {
+const XRayFiles = ({ xrayFiles, onUpdate }) => {
   const [predictions, setPredictions] = useState({});
   const [loadingPredictions, setLoadingPredictions] = useState({});
-  const { jwtToken } = useLogin(); // Get JWT token from Login context
+  const { jwtToken } = useLogin();
 
-  // Function to handle prediction API call
   const handlePrediction = async (imageUrl, index) => {
     const file = await urlToFile(imageUrl);
-
     const formData = new FormData();
     formData.append('image', file);
 
@@ -34,18 +30,17 @@ const XRayFiles = ({ xrayFiles }) => {
       const response = await fetch('https://xray-backend-196i.onrender.com/predict', {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${jwtToken}`, // Add JWT token in Authorization header
+          Authorization: `Bearer ${jwtToken}`,
         },
         body: formData,
       });
 
       const data = await response.json();
-      
-      // Update the predictions for this specific image
+
       setPredictions((prev) => ({
         ...prev,
         [index]: {
-          class_name: data.class_name.split(" ").slice(1,),
+          class_name: data.class_name.split(" ").slice(1, ),
           confidence_score: parseFloat(data.confidence_score).toFixed(3) * 100,
         },
       }));
@@ -64,17 +59,16 @@ const XRayFiles = ({ xrayFiles }) => {
   };
 
   useEffect(() => {
-    // Automatically make predictions for each X-ray file
     xrayFiles.forEach((file, index) => {
       if (file.imageUrl) {
-        handlePrediction(file.imageUrl, index); // Trigger prediction
+        handlePrediction(file.imageUrl, index);
       }
     });
   }, [xrayFiles]);
 
   return (
     <section className="bg-white p-6 rounded-lg shadow mb-6">
-      <h2 className="text-xl font-bold mb-4">X-Ray File Upload</h2>
+      <h2 className="text-xl font-bold mb-4">X-Ray Files</h2>
       <div className="grid grid-cols-3 gap-6">
         {xrayFiles.map((file, index) => (
           <div key={index} className="text-center">
@@ -86,9 +80,13 @@ const XRayFiles = ({ xrayFiles }) => {
               </div>
             )}
             <button className="bg-gray-200 text-gray-700 py-2 px-4 rounded-lg">View File</button>
-            <input type="text" placeholder="Side of X-ray" className="mt-2 w-full p-2 border rounded-lg" />
-            
-            {/* Model Prediction Section */}
+            <input 
+              type="text" 
+              placeholder="Side of X-ray" 
+              className="mt-2 w-full p-2 border rounded-lg" 
+              value={file.side} 
+              onChange={(e) => onUpdate(index, 'side', e.target.value)} 
+            />
             <div className="mt-4 p-4 bg-blue-50 rounded-lg shadow-md">
               <h4 className="text-lg font-semibold text-blue-700">Model Prediction:</h4>
               {loadingPredictions[index] ? (
@@ -109,13 +107,16 @@ const XRayFiles = ({ xrayFiles }) => {
   );
 };
 
-const PatientHistory = ({ history }) => (
+const PatientHistory = ({ history, onUpdate }) => (
   <section className="bg-white p-6 rounded-lg shadow mb-6">
     <h2 className="text-xl font-bold mb-4">Patient's History</h2>
-    <input type="text" value={history} readOnly className="mt-1 w-full p-2 border rounded-lg bg-gray-100 mb-6" />
+    <textarea 
+      value={history} 
+      className="mt-1 w-full p-2 border rounded-lg bg-gray-100 mb-6" 
+      onChange={(e) => onUpdate(e.target.value)} 
+    />
   </section>
 );
-
 const PatientDetails = ({ patientData }) => (
   <section className="bg-white p-6 rounded-lg shadow mb-6">
     <h2 className="text-xl font-bold mb-4">Patient Details</h2>
@@ -161,29 +162,65 @@ const PatientDetails = ({ patientData }) => (
   </section>
 );
 
-const PendingFeedback = ({ status, feedback, isEditable }) => (
-  (status === 'Pending' || isEditable) && (
+// const PatientDetails = ({ patientData, onUpdate }) => (
+//   <section className="bg-white p-6 rounded-lg shadow mb-6">
+//     <h2 className="text-xl font-bold mb-4">Patient Details</h2>
+//     <div className="grid grid-cols-2 gap-6">
+//       <div>
+//         <label className="block font-semibold">Patient Name</label>
+//         <input 
+//           type="text" 
+//           value={patientData.patientName} 
+//           className="mt-1 w-full p-2 border rounded-lg bg-gray-100" 
+//           onChange={(e) => onUpdate('patientName', e.target.value)} 
+//         />
+//       </div>
+//       <div>
+//         <label className="block font-semibold">Gender</label>
+//         <input 
+//           type="text" 
+//           value={patientData.gender} 
+//           className="mt-1 w-full p-2 border rounded-lg bg-gray-100" 
+//           onChange={(e) => onUpdate('gender', e.target.value)} 
+//         />
+//       </div>
+//     </div>
+//   </section>
+// );
+
+const PendingFeedback = ({ status, feedback, isEditable, onUpdate }) => (
+  isEditable && (
     <section className="bg-white p-6 rounded-lg shadow mb-6">
       <div className="grid grid-cols-2 gap-6">
         <div>
-          <label className="block font-semibold">Transaction Status <span className="text-red-600">*</span></label>
-          <select value={status} readOnly className="mt-1 w-full p-2 border rounded-lg bg-gray-100">
-            <option>Need More Info</option>
+          <label className="block font-semibold">Transaction Status</label>
+          <select 
+            value={status} 
+            className="mt-1 w-full p-2 border rounded-lg bg-gray-100" 
+            onChange={(e) => onUpdate('status', e.target.value)}
+          >
+            <option value="Need More Info">Need More Info</option>
+            <option value="In Review">In Review</option>
+            <option value="Complete">Complete</option>
+            <option value="Error in File">Error in File</option>
           </select>
         </div>
         <div>
-          <label className="block font-semibold">Doctor's Feedback <span className="text-red-600">*</span></label>
-          <textarea value={feedback} readOnly={!isEditable} className="mt-1 w-full p-2 border rounded-lg bg-gray-100" />
+          <label className="block font-semibold">Doctor's Feedback</label>
+          <textarea 
+            value={feedback} 
+            className="mt-1 w-full p-2 border rounded-lg bg-gray-100" 
+            onChange={(e) => onUpdate('feedback', e.target.value)}
+          />
         </div>
       </div>
     </section>
   )
 );
 
-const ReportTemplate = ({ reportTemplate, findings, impression, isEditable, setSelectedTemplate, selectedTemplate }) => (
+const ReportTemplate = ({templatesData, reportTemplate, findings, impression, isEditable, setSelectedTemplate, selectedTemplate }) => (
   <section className="bg-white p-6 rounded-lg shadow mb-6">
     <h3 className="font-semibold mb-2">Report Template</h3>
-    
     {isEditable ? (
       <select
         value={selectedTemplate?.heading || ''}
@@ -203,13 +240,11 @@ const ReportTemplate = ({ reportTemplate, findings, impression, isEditable, setS
     ) : (
       <input type="text" value={reportTemplate} readOnly className="mt-1 w-full p-2 border rounded-lg bg-gray-100" />
     )}
-
-    <div className="p-4 bg-gray-100 rounded-lg">
+    <div className="p-4 mt-4 bg-gray-100 rounded-lg">
       <h4 className="font-bold">Findings:</h4>
       {isEditable && selectedTemplate
         ? selectedTemplate.findings.map((finding, index) => <p key={index}>{finding}</p>)
         : findings.map((finding, index) => <p key={index}>{finding}</p>)}
-
       <h4 className="font-bold mt-4">Impression:</h4>
       {isEditable && selectedTemplate ? <p>{selectedTemplate.impression}</p> : <p>{impression}</p>}
     </div>
@@ -219,25 +254,25 @@ const ReportTemplate = ({ reportTemplate, findings, impression, isEditable, setS
 const PatientDetailsPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const reportId = location.state; // Get report ID from location.state
-  const { jwtToken } = useLogin(); // Get JWT token from Login context
+  const reportId = location.state; 
+  const { jwtToken } = useLogin(); 
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [isEditingTemplate, setIsEditingTemplate] = useState(false); // Editable state
-  const [selectedTemplate, setSelectedTemplate] = useState(null); // Selected template from dropdown
-  const [patientData, setPatientData] = useState(null); // State to hold fetched report data
+  const [isEditingTemplate, setIsEditingTemplate] = useState(false); 
+  const [selectedTemplate, setSelectedTemplate] = useState(null); 
+  const [patientData, setPatientData] = useState(null); 
+  const [templatesData,setTemplatesData] = useState([])
 
-  // Fetch report data by ID
   useEffect(() => {
     const fetchReportData = async () => {
       try {
         const response = await fetch(`https://api.insightxai.in/report/${reportId}`, {
           headers: {
-            Authorization: `Bearer ${jwtToken}`, // Add JWT token in Authorization header
+            Authorization: `Bearer ${jwtToken}`,
           },
         });
         const data = await response.json();
-        setPatientData(data.report); // Set fetched report data
+        setPatientData(data.report); 
         setLoading(false);
       } catch (error) {
         console.error('Error fetching report data:', error);
@@ -245,11 +280,25 @@ const PatientDetailsPage = () => {
     };
 
     if (reportId) {
-      fetchReportData(); // Fetch report data when reportId is available
+      fetchReportData();
     }
+    const fetchTemplates = async () => {
+      try {
+        const response = await fetch('https://api.insightxai.in/templates', {
+          headers: {
+            Authorization: `Bearer ${jwtToken}`, // Attach JWT token
+          },
+        });
+        const data = await response.json();
+        setTemplatesData(data.templates);
+      } catch (error) {
+        console.error('Error fetching templates:', error);
+      }
+    };
+
+    fetchTemplates();
   }, [reportId, jwtToken]);
 
-  // PUT request to update report data
   const handleSave = async () => {
     setLoading(true);
     try {
@@ -257,14 +306,14 @@ const PatientDetailsPage = () => {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${jwtToken}`, // Add JWT token in Authorization header
+          Authorization: `Bearer ${jwtToken}`,
         },
-        body: JSON.stringify(patientData), // Send updated report data
+        body: JSON.stringify(patientData),
       });
 
       if (response.ok) {
         setLoading(false);
-        window.location.reload(); // Refresh page after saving
+        window.location.reload(); 
       } else {
         console.error('Failed to update report');
       }
@@ -276,6 +325,22 @@ const PatientDetailsPage = () => {
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
+  };
+
+  const handleFieldUpdate = (field, value) => {
+    setPatientData(prevState => ({
+      ...prevState,
+      [field]: value,
+    }));
+  };
+
+  const handleXRayFileUpdate = (index, field, value) => {
+    const updatedXRayFiles = [...patientData.xrayFiles];
+    updatedXRayFiles[index][field] = value;
+    setPatientData(prevState => ({
+      ...prevState,
+      xrayFiles: updatedXRayFiles,
+    }));
   };
 
   if (loading) {
@@ -314,23 +379,24 @@ const PatientDetailsPage = () => {
           <div className="flex space-x-4">
             <button onClick={() => navigate('/reports')} className="bg-gray-200 text-gray-700 py-2 px-4 rounded-lg">Go to Reports List</button>
             {patientData.status === 'Complete' && !isEditingTemplate ? (
-              <button className="bg-blue-600 text-white py-2 px-4 rounded-lg" onClick={() => setIsEditingTemplate(true)}>
-                Submit For Revision
+              <button className="bg-blue-600 text-white flex py-2 px-4 rounded-lg" onClick={() => setIsEditingTemplate(true)}>
+                <FaEdit className="mr-2 self-center" /> Submit For Revision
               </button>
             ) : (
-              <button className="bg-blue-600 text-white py-2 px-4 rounded-lg" onClick={handleSave}>
-                Save
+              <button className="bg-blue-600 text-white flex py-2 px-4 rounded-lg" onClick={handleSave}>
+                <FaSave className="mr-2 self-center" /> Save
               </button>
             )}
             <button className="text-gray-700 p-2"><FaEllipsisV /></button>
           </div>
         </header>
 
-        <PatientDetails patientData={patientData} />
+        <PatientDetails patientData={patientData}  />
         <PatientHistory history={patientData.history} />
-        <XRayFiles xrayFiles={patientData.xrayFiles} /> {/* Display X-Ray images */}
+        <XRayFiles xrayFiles={patientData.xrayFiles} />
 
         <ReportTemplate
+          templatesData={templatesData}
           reportTemplate={patientData.reportTemplate}
           findings={patientData.findings}
           impression={patientData.impression}
@@ -346,7 +412,13 @@ const PatientDetailsPage = () => {
             </p>
           </div>
         )}
-        <PendingFeedback status={patientData.status} feedback={patientData.doctor_feedback} isEditable={isEditingTemplate} />
+
+        <PendingFeedback 
+          status={patientData.status} 
+          feedback={patientData.doctor_feedback} 
+          isEditable={isEditingTemplate} 
+          onUpdate={handleFieldUpdate} 
+        />
       </div>
     </div>
   );

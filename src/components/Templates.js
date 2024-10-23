@@ -38,7 +38,7 @@ const TemplatesPage = () => {
   const handleSaveClick = async () => {
     const updatedTemplate = editedTemplate;
     try {
-      await fetch(`https://api.insightxai.in/templates/${updatedTemplate.id}`, {
+      await fetch(`https://api.insightxai.in/template/${updatedTemplate._id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -49,9 +49,10 @@ const TemplatesPage = () => {
 
       const updatedTemplates = [...templates];
       updatedTemplates[editingIndex] = updatedTemplate;
-      setTemplates(updatedTemplates);
+      // setTemplates(updatedTemplates);
       setEditingIndex(null);
       setEditedTemplate(null);
+      window.location.reload()
     } catch (error) {
       console.error('Error saving template:', error);
     }
@@ -60,7 +61,7 @@ const TemplatesPage = () => {
   // Handle adding a new template
   const handleAddTemplate = async () => {
     try {
-      const response = await fetch('https://api.insightxai.in/templates', {
+      const response = await fetch('https://api.insightxai.in/template', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -71,9 +72,10 @@ const TemplatesPage = () => {
 
       const addedTemplate = await response.json();
       const updatedTemplates = [...templates, addedTemplate];
-      setTemplates(updatedTemplates);
+      // setTemplates(updatedTemplates);
       setNewTemplate({ heading: '', findings: [], impression: '' }); // Reset form fields
       setIsAddingTemplate(false);
+      window.location.reload()
     } catch (error) {
       console.error('Error adding template:', error);
     }
